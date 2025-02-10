@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block body %}
+    <ul>
+        {% for dish in dishes %}
+            <li>{{ dish.title }} - {{ dish.price }}</li>
+        {% endfor %}
+    </ul>
+
+{% endblock %}
+
+{% block pagination %}
+    {% include 'pagination.html' %}
+{% endblock %}
