@@ -25,6 +25,13 @@ class Order(models.Model):
         verbose_name="Заказанные позиции"
     )
 
+    total_price = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        default=0,
+        verbose_name="Общая стоимость заказа"
+    )
+
     status = models.IntegerField(
         choices=STATUS,
         default=PENDING,
@@ -35,6 +42,9 @@ class Order(models.Model):
         auto_now_add=True,
         verbose_name="Дата создания заказа"
     )
+
+    def __str__(self):
+        return f'Заказ для стола {self.table_number}, id {self.pk}'
 
     class Meta:
         verbose_name = "Заказ"
