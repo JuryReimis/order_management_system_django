@@ -39,6 +39,8 @@ if ALLOWED_HOSTS_STR == '*':
 else:
     ALLOWED_HOSTS = ALLOWED_HOSTS_STR.split(',')
 
+INTERNAL_IPS = os.getenv('INTERNAL_IPS').split(',')
+
 # Application definition
 
 INSTALLED_APPS = [
