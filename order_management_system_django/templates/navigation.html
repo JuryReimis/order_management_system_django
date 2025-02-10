@@ -2,7 +2,7 @@
 <div>
     <ul>
         <li>
-            <a href="/">Создать заказ</a>
+            <a href="{% url 'orders:create_order' %}">Создать заказ</a>
         </li>
         <li>
             <a href="{% url 'carte:create_dish' %}">Добавить блюдо</a>
@@ -11,7 +11,7 @@
             <a href="{% url 'carte:get_all_dishes' %}">Посмотреть список всех блюд</a>
         </li>
         <li>
-            <a href="/">Посмотреть все заказы</a>
+            <a href="{% url 'orders:get_all_orders' %}">Посмотреть все заказы</a>
         </li>
     </ul>
 </div>
