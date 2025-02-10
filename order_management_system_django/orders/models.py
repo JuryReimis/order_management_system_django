@@ -30,6 +30,11 @@ class Order(models.Model):
         verbose_name="Статус заказа"
     )
 
+    created = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name="Дата создания заказа"
+    )
+
     class Meta:
         verbose_name = "Заказ"
         verbose_name_plural = "Заказы"
