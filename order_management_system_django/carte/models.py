@@ -7,6 +7,7 @@ class Dish(models.Model):
         max_length=150,
         blank=False,
         null=False,
+        unique=True,
         verbose_name="Название блюда"
     )
 
