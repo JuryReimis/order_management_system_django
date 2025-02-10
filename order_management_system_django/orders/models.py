@@ -27,6 +27,7 @@ class Order(models.Model):
 
     status = models.IntegerField(
         choices=STATUS,
+        default=PENDING,
         verbose_name="Статус заказа"
     )
 
