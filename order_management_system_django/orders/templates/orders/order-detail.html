@@ -2,4 +2,24 @@
 
 {% block body %}
 
+    <div>
+    <ul>
+        <li>
+            Номер стола: {{ order.table_number }}
+        </li>
+        <li>
+            Позиции:
+            <ul>
+                {% for item in order.items.all %}
+                	<li>{{ item }}</li>
+                {% endfor %}
+
+            </ul>
+        </li>
+        <li>
+            Статус заказа: {{ order.get_status_display }}
+        </li>
+    </ul>
+    </div>
+
 {% endblock %}
