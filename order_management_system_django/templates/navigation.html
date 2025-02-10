@@ -5,7 +5,10 @@
             <a href="/">Создать заказ</a>
         </li>
         <li>
-            <a href="/">Добавить блюдо</a>
+            <a href="{% url 'carte:create_dish' %}">Добавить блюдо</a>
+        </li>
+        <li>
+            <a href="{% url 'carte:get_all_dishes' %}">Посмотреть список всех блюд</a>
         </li>
         <li>
             <a href="/">Посмотреть все заказы</a>
