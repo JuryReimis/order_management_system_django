@@ -27,12 +27,16 @@ class Dish(models.Model):
             update_fields=None,
     ):
         super().save(force_insert=force_insert, force_update=force_update, using=using, update_fields=update_fields)
-        old_price = self.prices.first()
+        old_prices = self.prices.order_by('-changed').first()
+        if old_prices:
+            old_price = old_prices.new_price
+        else:
+            old_price = None
         if old_price != self.price:
             DishPriceChanges.objects.create(dish=self, new_price=self.price)
 
     def __str__(self):
-        return f'{self.title} за {self.price} Р'
+        return f'{self.title} - {self.price} Р'
 
     class Meta:
         verbose_name = "Блюдо"
