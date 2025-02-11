@@ -45,7 +45,7 @@ class Order(models.Model):
     )
 
     @classmethod
-    def get_status_db(cls, new_status: str) -> int|None:
+    def get_status_db(cls, new_status: str) -> int | None:
         for status in cls.STATUS:
             if status[1].lower() == new_status:
                 return status[0]
@@ -57,6 +57,13 @@ class Order(models.Model):
     class Meta:
         verbose_name = "Заказ"
         verbose_name_plural = "Заказы"
+        constraints = [
+            models.UniqueConstraint(
+                name='unique_table_number_for_unpaid_orders',
+                fields=['table_number'],
+                condition=models.Q(status__in=[0, 1])
+            )
+        ]
 
 
 class OrderItems(models.Model):
