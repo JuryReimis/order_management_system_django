@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block body %}
+    <div>
+        <ul>
+            <li>
+                Название: {{ dish.title }}
+                <form method="post">
+                    {% csrf_token %}
+                    <label for="new-title">Сменить название</label>
+                    <input id="new-title" name="new_title" type="text">
+                    <button type="submit">Применить</button>
+                </form>
+            </li>
+            <li>
+                Цена: {{ dish.price }}
+                <form method="post">
+                    {% csrf_token %}
+                    <label for="new-price">Новая цена</label>
+                    <input id="new-price" name="new_price" type="text">
+                    <button type="submit">Применить</button>
+                </form>
+            </li>
+        </ul>
+    </div>
+{% endblock %}
