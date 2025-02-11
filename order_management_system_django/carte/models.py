@@ -18,6 +18,19 @@ class Dish(models.Model):
         verbose_name="Цена"
     )
 
+    def save(
+            self,
+            *args,
+            force_insert=False,
+            force_update=False,
+            using=None,
+            update_fields=None,
+    ):
+        super().save(force_insert=force_insert, force_update=force_update, using=using, update_fields=update_fields)
+        old_price = self.prices.first()
+        if old_price != self.price:
+            DishPriceChanges.objects.create(dish=self, new_price=self.price)
+
     def __str__(self):
         return f'{self.title} за {self.price} Р'
 
@@ -31,6 +44,7 @@ class DishPriceChanges(models.Model):
     dish = models.ForeignKey(
         to='carte.Dish',
         on_delete=models.CASCADE,
+        related_name='prices',
         verbose_name="Блюдо"
     )
 
