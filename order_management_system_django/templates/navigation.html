@@ -18,12 +18,19 @@
             <a href="{% url 'orders:create_order' %}">Создать заказ</a>
         </li>
         <li>
-            <a href="/">Поиск заказа</a>
-        </li>
-        <li>
             <a href="{% url 'orders:get_all_orders' %}">Посмотреть все заказы</a>
         </li>
     </ul>
+    <div>
+        <span>Поиск заказов: </span>
+        <form method="get" action="{% url 'orders:order_search' %}">
+            <label for="table">Номер стола</label>
+            <input id="table" name="table">
+            <label for="status">Статус заказа</label>
+            <input id="status" name="status">
+            <button>Поиск</button>
+        </form>
+    </div>
 </div>
 
 
