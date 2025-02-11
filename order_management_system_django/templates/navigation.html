@@ -1,14 +1,24 @@
-
 <div>
+    <span>Блюда: </span>
+    <ul>
+        <li>
+            <a href="{% url 'carte:create_dish' %}">Добавить блюдо</a>
+        </li>
+        <li>
+            <a href="/">Поиск блюда</a>
+        </li>
+        <li>
+            <a href="{% url 'carte:get_all_dishes' %}">Посмотреть список всех блюд</a>
+        </li>
+    </ul>
+
+    <span>Заказы: </span>
     <ul>
         <li>
             <a href="{% url 'orders:create_order' %}">Создать заказ</a>
         </li>
         <li>
-            <a href="{% url 'carte:create_dish' %}">Добавить блюдо</a>
-        </li>
-        <li>
-            <a href="{% url 'carte:get_all_dishes' %}">Посмотреть список всех блюд</a>
+            <a href="/">Поиск заказа</a>
         </li>
         <li>
             <a href="{% url 'orders:get_all_orders' %}">Посмотреть все заказы</a>
