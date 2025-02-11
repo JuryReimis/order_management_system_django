@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block body %}
+    <div>
+        <form id="selectForm" method="post">
+            {% csrf_token %}
+
+            <ul>
+                <h3>Присутствуют в заказе:</h3>
+                {% for item in order.items.all %}
+                    <li>
+                        <input type="checkbox" name="items" checked id="checkbox_{{ item.pk }}" value="{{ item.pk }}">
+                        <label for="checkbox_{{ item.pk }}">{{ item.title }} - {{ item.price }}</label>
+                    </li>
+                {% endfor %}
+
+            </ul>
+
+            <ul>
+                <h3>Можно добавить:</h3>
+                {% for dish in dishes %}
+                    <li>
+                        <input type="checkbox" id="checkbox_{{ dish.pk }}" name="items" value="{{ dish.pk }}">
+                        <label for="checkbox_{{ dish.pk }}">{{ dish.title }} - {{ dish.price }}</label>
+                    </li>
+                {% endfor %}
+            </ul>
+
+            <button type="submit">Сохранить</button>
+        </form>
+
+        <div>
+
+
+        </div>
+    </div>
+{% endblock %}
