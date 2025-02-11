@@ -1,10 +1,10 @@
-from django.db.models import Q
+from django.db import IntegrityError
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.views import generic, View
 
 from orders.dto.search_query import SearchQueryDTO
-from orders.forms import CreateNewOrderForm
+from orders.forms import CreateNewOrderForm, UpdateOrderItemsForm
 from orders.models import Order
 from orders.services.compile_order_filter import CompileOrderFilterService
 
@@ -13,6 +13,13 @@ class CreateNewOrderView(generic.CreateView):
     template_name = 'orders/add-new-order.html'
     form_class = CreateNewOrderForm
     success_url = reverse_lazy('orders:create_order')
+
+    def form_valid(self, form):
+        try:
+            super().form_valid(form)
+        except IntegrityError:
+            form.add_error('table_number', "Для этого стола уже зарегистрирован неоплаченный заказ")
+            return self.form_invalid(form)
 
 
 class GetAllOrdersView(generic.ListView):
