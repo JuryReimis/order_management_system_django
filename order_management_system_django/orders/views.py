@@ -1,8 +1,9 @@
 from django.db import IntegrityError
-from django.shortcuts import get_object_or_404, redirect
+from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
 from django.views import generic, View
 
+from carte.models import Dish
 from orders.dto.search_query import SearchQueryDTO
 from orders.forms import CreateNewOrderForm, UpdateOrderItemsForm
 from orders.models import Order
@@ -44,6 +45,24 @@ class OrderDeleteView(generic.DeleteView):
     def get_object(self, queryset=None):
         order = get_object_or_404(Order, pk=self.kwargs.get('pk'))
         return order
+
+
+class OrderChangeItemsView(generic.UpdateView):
+    form_class = UpdateOrderItemsForm
+    template_name = 'orders/update-order-items.html'
+    model = Order
+
+    def get(self, request, *args, **kwargs):
+        order = self.get_object()
+        dishes = Dish.objects.exclude(pk__in=order.items.all().values_list('id', flat=True))
+        context = {
+            'order': order,
+            'dishes': dishes
+        }
+        return render(request, self.get_template_names(), context=context)
+
+    def get_success_url(self):
+        return reverse_lazy('orders:order_detail', kwargs={'pk': self.kwargs.get('pk')})
 
 
 class OrderChangeStatusView(View):
