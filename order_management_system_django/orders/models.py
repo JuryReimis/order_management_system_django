@@ -44,6 +44,13 @@ class Order(models.Model):
         verbose_name="Дата создания заказа"
     )
 
+    @classmethod
+    def get_status_db(cls, new_status: str) -> int|None:
+        for status in cls.STATUS:
+            if status[1].lower() == new_status:
+                return status[0]
+        return None
+
     def __str__(self):
         return f'Заказ для стола {self.table_number}, id {self.pk}'
 
