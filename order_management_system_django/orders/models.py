@@ -2,7 +2,6 @@ from django.db import models
 
 
 class Order(models.Model):
-
     PENDING = 0
     READY = 1
     PAID = 2
@@ -20,6 +19,8 @@ class Order(models.Model):
 
     items = models.ManyToManyField(
         to='carte.Dish',
+        through='orders.OrderItems',
+        through_fields=('order', 'dish'),
         blank=False,
         related_name="orders",
         verbose_name="Заказанные позиции"
@@ -49,3 +50,24 @@ class Order(models.Model):
     class Meta:
         verbose_name = "Заказ"
         verbose_name_plural = "Заказы"
+
+
+class OrderItems(models.Model):
+    order = models.ForeignKey(
+        to='orders.Order',
+        on_delete=models.CASCADE,
+        related_name="order_items",
+        verbose_name="Заказ"
+    )
+
+    dish = models.ForeignKey(
+        to='carte.Dish',
+        on_delete=models.CASCADE,
+        related_name="dish_items",
+        verbose_name="Блюдо"
+    )
+
+    created = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name="Время добавления блюда в заказ"
+    )
