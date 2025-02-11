@@ -3,23 +3,33 @@
 {% block body %}
 
     <div>
-    <ul>
-        <li>
-            Номер стола: {{ order.table_number }}
-        </li>
-        <li>
-            Позиции:
-            <ul>
-                {% for item in order.items.all %}
-                	<li>{{ item }}</li>
-                {% endfor %}
+        <ul>
+            <li>
+                Id заказа: {{ order.pk }}
+            </li>
+            <li>
+                Номер стола: {{ order.table_number }}
+            </li>
+            <li>
+                Позиции:
+                <ul>
+                    {% for item in order.items.all %}
+                        <li>{{ item }}</li>
+                    {% endfor %}
 
-            </ul>
-        </li>
-        <li>
-            Статус заказа: {{ order.get_status_display }}
-        </li>
-    </ul>
+                </ul>
+            </li>
+            <li>
+                Общая стоимость: {{ order.total_price }} Р
+            </li>
+            <li>
+                Статус заказа: {{ order.get_status_display }}
+            </li>
+        </ul>
     </div>
 
+    <form method="post" action="{% url 'orders:order-delete' order.pk %}">
+        {% csrf_token %}
+        <button>Удалить заказ</button>
+    </form>
 {% endblock %}
