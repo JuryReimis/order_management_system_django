@@ -1,9 +1,12 @@
+from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.views import generic, View
 
+from orders.dto.search_query import SearchQueryDTO
 from orders.forms import CreateNewOrderForm
 from orders.models import Order
+from orders.services.compile_order_filter import CompileOrderFilterService
 
 
 class CreateNewOrderView(generic.CreateView):
@@ -55,4 +58,25 @@ class OrderChangeStatusView(View):
 
     def get_object(self):
         order = get_object_or_404(Order, pk=self.kwargs.get('pk'))
+        return order
+
+
+class OrderSearchView(generic.ListView):
+    paginate_by = 10
+    context_object_name = 'orders'
+    template_name = 'orders/orders-list.html'
+
+    def get(self, request, *args, **kwargs):
+        table = request.GET.get('table')
+        status = request.GET.get('status')
+        service = CompileOrderFilterService()
+        query = SearchQueryDTO(table=table, status=status)
+        callback = service.execute(query)
+        filter_opt = callback.filter
+        self.kwargs['filter_opt'] = filter_opt
+        return super().get(request, args, kwargs)
+
+    def get_queryset(self):
+        filter_opt = self.kwargs.pop('filter_opt')
+        order = Order.objects.filter(filter_opt).order_by('-created')
         return order
