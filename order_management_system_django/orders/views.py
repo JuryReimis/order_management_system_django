@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.urls import reverse_lazy
 from django.views import generic
 
@@ -25,3 +25,13 @@ class GetAllOrdersView(generic.ListView):
 class OrderDetailView(generic.DetailView):
     model = Order
     template_name = 'orders/order-detail.html'
+
+
+class OrderDeleteView(generic.DeleteView):
+
+    success_url = reverse_lazy('orders:get_all_orders')
+
+    def get_object(self, queryset=None):
+        order = get_object_or_404(Order, pk=self.kwargs.get('pk'))
+        return order
+
