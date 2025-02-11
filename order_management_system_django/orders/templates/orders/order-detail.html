@@ -18,6 +18,10 @@
                     {% endfor %}
 
                 </ul>
+                {% if order.status == order.PENDING %}
+                    <a href="{% url 'orders:change-order-items' order.pk %}">Изменить блюда в заказе</a>
+                {% endif %}
+
             </li>
             <li>
                 Общая стоимость: {{ order.total_price }} Р
