@@ -7,4 +7,5 @@ from datetime import datetime
 class DishPriceDTO:
     dish_id: int
     price: Decimal
+    quantity: int
     changed: datetime
