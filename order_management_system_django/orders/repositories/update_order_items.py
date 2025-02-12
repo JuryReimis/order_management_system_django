@@ -1,6 +1,8 @@
+from decimal import Decimal
 from typing import List
 
 from django.db import transaction
+from django.utils import timezone
 
 from carte.models import Dish
 from orders.dto.order_items import OrderItemsDTO
@@ -12,6 +14,10 @@ class UpdateOrderItemsRepository:
         self._order_items = dto
         self._order_items_to_update = []
         self._order_items_to_create = []
+        self._order = self._get_order(self._order_items.order_id)
+
+    def _get_order(self, order_id):
+        return Order.objects.get(pk=order_id)
 
     @staticmethod
     def _delete_unselected_items(order: Order, items: List[int]):
@@ -39,10 +45,20 @@ class UpdateOrderItemsRepository:
         if self._order_items_to_create:
             OrderItems.objects.bulk_create(self._order_items_to_create)
 
-    def execute(self):
-        order: Order = Order.objects.get(pk=self._order_items.order_id)
+    def _update_total_price(self, total_price: Decimal):
+        last_update = timezone.now()
+        order = self._order
+        order.total_price = total_price
+        order.updated = last_update
+        order.save()
+
+    def update_items(self):
+        order = self._order
         items = list(self._order_items.items_quantity_dict.keys())
         with transaction.atomic():
             self._delete_unselected_items(order, items)
             self._compile_items_lists(order, items)
             self._bulk_update()
+
+    def update_order(self, total_price: Decimal):
+        self._update_total_price(total_price)
