@@ -14,8 +14,8 @@ from orders.dto.order_items import OrderItemsDTO
 from orders.dto.search_query import SearchQueryDTO
 from orders.forms import CreateNewOrderForm, UpdateOrderItemsForm, UpdateQuantityForm
 from orders.models import Order, OrderItems
-from orders.repositories.update_order_items import UpdateOrderItemsRepository
 from orders.services.compile_order_filter import CompileOrderFilterService
+from orders.services.update_order import UpdateOrderService
 
 
 class CreateNewOrderView(generic.CreateView):
@@ -74,8 +74,8 @@ class OrderChangeItemsView(View):
                 items_quantity_dict={int(item): int(request.POST.get(f'item_{item}-quantity', 1)) for item in items},
                 last_update=timezone.now()
             )
-            repository = UpdateOrderItemsRepository(dto=dto)
-            repository.execute()
+            service = UpdateOrderService(dto)
+            service.execute()
         else:
             raise Http404(f"Не получены данные, необходимые для обновления id = {order_id}, выбранные блюда = {items}")
 
