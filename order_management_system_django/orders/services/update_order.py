@@ -11,12 +11,12 @@ class UpdateOrderService:
     def __init__(self, order_items_dto: OrderItemsDTO):
         self._order_items_dto = order_items_dto
 
-    def execute(self):
+    def execute(self, table_number: int | None = None):
         """Обновляет элементы заказа и пересчитывает общую стоимость."""
 
         with transaction.atomic():
             repository = UpdateOrderItemsRepository(self._order_items_dto)
-            repository.update_items()
+            repository.save_items(table_number)
 
             price_repository = DishPriceRepository()
             total_price = CalculateTotalPriceService().execute(self._order_items_dto, price_repository)
