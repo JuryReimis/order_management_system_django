@@ -9,9 +9,9 @@ from orders.dto.order_items import OrderItemsDTO
 
 class DishPriceRepository:
 
-    def get_prices(self, items: OrderItemsDTO,) -> List[DishPriceDTO]:
-        items_ids = items.items_ids
-        changed_date = items.last_update
+    def get_prices(self, order_items: OrderItemsDTO, ) -> List[DishPriceDTO]:
+        items_ids = order_items.items_quantity_dict.keys()
+        changed_date = order_items.last_update
         max_price_date_subquery = DishPriceChanges.objects.filter(
             dish=OuterRef('dish'),
             changed__lte=changed_date
@@ -27,5 +27,5 @@ class DishPriceRepository:
         ).filter(
             changed=F('max_changed')
         ).values('dish_id', 'new_price', 'changed')
-        return [DishPriceDTO(dish_id=value['dish_id'], price=value['new_price'], changed=value['changed']) for value in
-                price_list]
+        return [DishPriceDTO(dish_id=value['dish_id'], price=value['new_price'], changed=value['changed'],
+                             quantity=order_items.items_quantity_dict.get(value['dish_id'])) for value in price_list]
