@@ -1,36 +1,48 @@
-<div>
-    <span>Блюда: </span>
-    <ul>
-        <li>
-            <a href="{% url 'carte:create_dish' %}">Добавить блюдо</a>
-        </li>
-        <li>
-            <a href="/">Поиск блюда</a>
-        </li>
-        <li>
-            <a href="{% url 'carte:get_all_dishes' %}">Посмотреть список всех блюд</a>
-        </li>
-    </ul>
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="#">Меню</a>
 
-    <span>Заказы: </span>
-    <ul>
-        <li>
-            <a href="{% url 'orders:create_order' %}">Создать заказ</a>
-        </li>
-        <li>
-            <a href="{% url 'orders:get_all_orders' %}">Посмотреть все заказы</a>
-        </li>
-    </ul>
-    <div>
-        <span>Поиск заказов: </span>
-        <form method="get" action="{% url 'orders:order_search' %}">
-            <label for="table">Номер стола</label>
-            <input id="table" name="table">
-            <label for="status">Статус заказа</label>
-            <input id="status" name="status">
-            <button>Поиск</button>
-        </form>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="dishesDropdown" role="button"
+                       data-bs-toggle="dropdown" aria-expanded="false">
+                        Блюда
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="dishesDropdown">
+                        <li><a class="dropdown-item" href="{% url 'carte:create_dish' %}">Добавить блюдо</a></li>
+                        <li><a class="dropdown-item" href="{% url 'carte:get_all_dishes' %}">Посмотреть список всех
+                            блюд</a></li>
+                    </ul>
+                </li>
+
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="ordersDropdown" role="button"
+                       data-bs-toggle="dropdown" aria-expanded="false">
+                        Заказы
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="ordersDropdown">
+                        <li><a class="dropdown-item" href="{% url 'orders:create_order' %}">Создать заказ</a></li>
+                        <li><a class="dropdown-item" href="{% url 'orders:get_all_orders' %}">Посмотреть все заказы</a>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+
+            <form class="d-flex" method="get" action="{% url 'orders:order_search' %}">
+                <div class="input-group">
+                    <input type="text" class="form-control" id="table" name="table" placeholder="Номер стола">
+                    <input type="text" class="form-control" id="status" name="status" placeholder="Статус заказа">
+                    <button class="btn btn-outline-success" type="submit">Поиск</button>
+                </div>
+            </form>
+        </div>
     </div>
-</div>
+</nav>
 
 
