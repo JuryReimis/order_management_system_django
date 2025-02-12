@@ -1,7 +1,7 @@
 from decimal import Decimal
 from typing import List
 
-from django.db import transaction
+from django.db import transaction, IntegrityError
 from django.utils import timezone
 
 from carte.models import Dish
@@ -16,7 +16,10 @@ class UpdateOrderItemsRepository:
         self._order_items_to_create = []
         self._order = self._get_order(self._order_items.order_id)
 
-    def _get_order(self, order_id):
+    @staticmethod
+    def _get_order(order_id):
+        if order_id is None:
+            return None
         return Order.objects.get(pk=order_id)
 
     @staticmethod
@@ -52,13 +55,26 @@ class UpdateOrderItemsRepository:
         order.updated = last_update
         order.save()
 
-    def update_items(self):
+    @staticmethod
+    def _create_items(table_number):
+        return Order.objects.create(table_number=table_number)
+
+    def _update_items(self):
         order = self._order
-        items = list(self._order_items.items_quantity_dict.keys())
-        with transaction.atomic():
-            self._delete_unselected_items(order, items)
-            self._compile_items_lists(order, items)
-            self._bulk_update()
+        if order is not None:
+            items = list(self._order_items.items_quantity_dict.keys())
+            with transaction.atomic():
+                self._delete_unselected_items(order, items)
+                self._compile_items_lists(order, items)
+                self._bulk_update()
+        else:
+            raise IntegrityError("Не передано ни номера стола, ни id заказа")
+
+    def save_items(self, table_number: int = None):
+        if table_number is not None:
+            self._order = self._create_items(table_number)
+            self._order_items.last_update = self._order.updated
+        self._update_items()
 
     def update_order(self, total_price: Decimal):
         self._update_total_price(total_price)
