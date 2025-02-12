@@ -10,11 +10,16 @@ from django.urls import reverse_lazy
 from django.views import generic, View
 
 from carte.models import Dish
+from carte.repositories.dish import DishRepository
+from carte.repositories.price_changes import PriceChangesRepository
+from orders.dto.order import OrderDTO
 from orders.dto.order_items import OrderItemsDTO
 from orders.dto.search_query import SearchQueryDTO
 from orders.forms import CreateNewOrderForm, UpdateOrderItemsForm, UpdateQuantityForm
 from orders.models import Order, OrderItems
+from orders.repositories.order import OrderRepository
 from orders.services.compile_order_filter import CompileOrderFilterService
+from orders.services.get_detail_order_context import GetDetailOrderContextService
 from orders.services.update_order import UpdateOrderService
 
 
@@ -72,16 +77,31 @@ class GetAllOrdersView(generic.ListView):
 class OrderDetailView(generic.DetailView):
     model = Order
     template_name = 'orders/order-detail.html'
+    context_object_name = 'order'
 
     def get_object(self, queryset=None):
-        obj: Order = super().get_object(queryset=queryset)
-        pk_quantity = {}
-        for item in obj.order_items.all():
-            pk_quantity[item.dish_id] = item.quantity
-        self.extra_context = {
-            'pk_price_dict': pk_quantity
-        }
-        return obj
+        dto = OrderDTO(
+            order_id=self.kwargs['pk'],
+            status_display=None,
+            updated=None,
+            table_number=None,
+            status=None,
+            items=None,
+            total_price=None
+        )
+        order_repository = OrderRepository
+        items_repository = DishRepository
+        price_changes_repository = PriceChangesRepository
+        try:
+            service = GetDetailOrderContextService(order_repository=order_repository, items_repository=items_repository,
+                                                   price_changes_repository=price_changes_repository)
+            obj = service.execute(order=dto)
+            return obj
+        except ValueError as err:
+            messages.error(self.request, f"Произошла ошибка {err}")
+        except Exception as err:
+            messages.error(self.request, f"Непредвиденная ошибка {err}")
+        return redirect('orders:get_all_orders')
 
 
 class OrderDeleteView(generic.DeleteView):
