@@ -1,26 +1,53 @@
 {% extends 'base.html' %}
+{% load static %}
+
+{% block head %}
+	<link href="{% static 'orders/css/styles.css' %}" rel="stylesheet">
+{% endblock %}
+
 
 {% block body %}
-	<div>
-        <form method="post">
+    <div class="container mt-5">
+        <h2 class="mb-4">Добавление нового заказа</h2>
+        <form method="post" class="needs-validation" novalidate>
             {% csrf_token %}
 
-            <label for="id-table-number">Номер стола: </label>
-            <input type="number" required name="table_number" id="id-table-number">
-            <ul>
+            <div class="mb-3">
+                <label for="id-table-number" class="form-label">Номер стола:</label>
+                <input type="number" class="form-control" id="id-table-number" name="table_number" required>
+                <div class="invalid-feedback">
+                    Пожалуйста, введите номер стола.
+                </div>
+            </div>
+
+            <div class="mb-3">
                 <h3>Можно добавить:</h3>
-                {% for dish in dishes %}
-                    <li>
-                        <input type="checkbox" id="checkbox_{{ dish.pk }}" name="items" value="{{ dish.pk }}">
-                        <label for="checkbox_{{ dish.pk }}">{{ dish.title }} - {{ dish.price }} Р</label>
-                        <div>
-                            <label for="id_item_{{ dish.pk }}">Количество блюд в заказе</label>
-                            <input type="number" value="1" min="0" id="id_item_{{ dish.pk }}" name="item_{{ dish.pk }}-quantity">
-                        </div>
-                    </li>
-                {% endfor %}
-            </ul>
-            <button type="submit">Добавить</button>
+                <div class="border rounded scrollable-dish-list">
+                    <ul class="list-group">
+                        {% for dish in dishes %}
+                            <li class="list-group-item">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="checkbox_{{ dish.pk }}"
+                                           name="items"
+                                           value="{{ dish.pk }}">
+                                    <label class="form-check-label" for="checkbox_{{ dish.pk }}">
+                                        {{ dish.title }} - {{ dish.price }} Р
+                                    </label>
+                                </div>
+                                <div class="mt-2">
+                                    <label for="id_item_{{ dish.pk }}" class="form-label">Количество блюд в
+                                        заказе:</label>
+                                    <input type="number" class="form-control" id="id_item_{{ dish.pk }}"
+                                           name="item_{{ dish.pk }}-quantity" value="1" min="0">
+                                </div>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Кнопка отправки формы -->
+            <button type="submit" class="btn btn-primary">Добавить заказ</button>
         </form>
     </div>
 {% endblock %}
