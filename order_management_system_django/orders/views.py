@@ -1,12 +1,20 @@
+from typing import List
+
 from django.db import IntegrityError
+from django.db.models import QuerySet
+from django.forms import formset_factory
+from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
+from django.utils import timezone
 from django.views import generic, View
 
 from carte.models import Dish
+from orders.dto.order_items import OrderItemsDTO
 from orders.dto.search_query import SearchQueryDTO
-from orders.forms import CreateNewOrderForm, UpdateOrderItemsForm
-from orders.models import Order
+from orders.forms import CreateNewOrderForm, UpdateOrderItemsForm, UpdateQuantityForm
+from orders.models import Order, OrderItems
+from orders.repositories.update_order_items import UpdateOrderItemsRepository
 from orders.services.compile_order_filter import CompileOrderFilterService
 
 
@@ -17,7 +25,7 @@ class CreateNewOrderView(generic.CreateView):
 
     def form_valid(self, form):
         try:
-            super().form_valid(form)
+            return super().form_valid(form)
         except IntegrityError:
             form.add_error('table_number', "Для этого стола уже зарегистрирован неоплаченный заказ")
             return self.form_invalid(form)
@@ -39,7 +47,6 @@ class OrderDetailView(generic.DetailView):
 
 
 class OrderDeleteView(generic.DeleteView):
-
     success_url = reverse_lazy('orders:get_all_orders')
 
     def get_object(self, queryset=None):
@@ -47,19 +54,54 @@ class OrderDeleteView(generic.DeleteView):
         return order
 
 
-class OrderChangeItemsView(generic.UpdateView):
+class OrderChangeItemsView(View):
     form_class = UpdateOrderItemsForm
     template_name = 'orders/update-order-items.html'
     model = Order
 
     def get(self, request, *args, **kwargs):
-        order = self.get_object()
-        dishes = Dish.objects.exclude(pk__in=order.items.all().values_list('id', flat=True))
+        order = Order.objects.get(pk=kwargs['pk'])
+        dishes = list(Dish.objects.exclude(pk__in=order.items.all().values_list('id', flat=True)))
+        context = self.get_context_data(order=order, items=dishes)
+        return render(request, self.template_name, context=context)
+
+    def post(self, request, *args, **kwargs):
+        order_id = kwargs['pk']
+        items = request.POST.getlist('items')
+        if order_id is not None and items is not None:
+            dto = OrderItemsDTO(
+                order_id=order_id,
+                items_quantity_dict={int(item): int(request.POST.get(f'item_{item}-quantity', 1)) for item in items},
+                last_update=timezone.now()
+            )
+            repository = UpdateOrderItemsRepository(dto=dto)
+            repository.execute()
+        else:
+            raise Http404(f"Не получены данные, необходимые для обновления id = {order_id}, выбранные блюда = {items}")
+
+        return redirect(self.get_success_url())
+
+    def get_context_data(self, order: Order, items: List[Dish], **kwargs):
+        order_items = order.order_items.all()
+        formset = self.get_formset(order_items)
+        form_dict = {}
+        for form in formset:
+            dish_id = form.initial['dish_id']
+            form.prefix = f"item_{dish_id}"
+            form_dict[dish_id] = form
         context = {
             'order': order,
-            'dishes': dishes
+            'dishes': items,
+            'form_dict': form_dict
         }
-        return render(request, self.get_template_names(), context=context)
+        return context
+
+    def get_formset(self, order_items: QuerySet[OrderItems]):
+        UpdateQuantityFormSet = formset_factory(UpdateQuantityForm, extra=0)
+        return UpdateQuantityFormSet(
+            initial=[{'quantity': item.quantity,
+                      'dish_id': item.dish_id} for item in order_items]
+        )
 
     def get_success_url(self):
         return reverse_lazy('orders:order_detail', kwargs={'pk': self.kwargs.get('pk')})
@@ -75,7 +117,7 @@ class OrderChangeStatusView(View):
         elif 'paid' in request.POST:
             new_status = Order.PAID
         self.save_new_status(obj, new_status)
-        return redirect('orders:order_detail',  pk=kwargs.get('pk'))
+        return redirect('orders:order_detail', pk=kwargs.get('pk'))
 
     @staticmethod
     def save_new_status(obj: Order, status: Order.STATUS):
