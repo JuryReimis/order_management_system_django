@@ -73,6 +73,16 @@ class OrderDetailView(generic.DetailView):
     model = Order
     template_name = 'orders/order-detail.html'
 
+    def get_object(self, queryset=None):
+        obj: Order = super().get_object(queryset=queryset)
+        pk_quantity = {}
+        for item in obj.order_items.all():
+            pk_quantity[item.dish_id] = item.quantity
+        self.extra_context = {
+            'pk_price_dict': pk_quantity
+        }
+        return obj
+
 
 class OrderDeleteView(generic.DeleteView):
     success_url = reverse_lazy('orders:get_all_orders')
