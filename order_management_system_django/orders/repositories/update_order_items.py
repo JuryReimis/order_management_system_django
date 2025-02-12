@@ -68,7 +68,7 @@ class UpdateOrderItemsRepository:
                 self._compile_items_lists(order, items)
                 self._bulk_update()
         else:
-            raise IntegrityError("Не передано ни номера стола, ни id заказа")
+            raise ValueError("Не передано ни номера стола, ни id заказа")
 
     def save_items(self, table_number: int = None):
         if table_number is not None:
