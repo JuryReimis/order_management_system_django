@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from datetime import datetime
-from typing import List
+from typing import Dict
 
 
 @dataclass
@@ -9,5 +9,5 @@ class OrderItemsDTO:
     last_update должно быть присвоено значение последнего изменения списка блюд в заказе"""
 
     order_id: int
-    items_ids: List[int]
+    items_quantity_dict: Dict[int, int]
     last_update: datetime
