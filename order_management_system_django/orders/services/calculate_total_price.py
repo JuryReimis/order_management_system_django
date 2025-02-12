@@ -11,10 +11,10 @@ class CalculateTotalPriceService:
     def _get_price_list(self, dto, repository) -> List[DishPriceDTO]:
         return repository.get_prices(dto)
 
-    def _get_sum(self, price_list: List[DishPriceDTO]):
+    def _get_sum(self, dish_list: List[DishPriceDTO]):
         total = 0
-        for dish_price in price_list:
-            total += dish_price.price
+        for dish in dish_list:
+            total += dish.price * dish.quantity
         return total
 
     def execute(self, order_items: OrderItemsDTO, repository: DishPriceRepository):
