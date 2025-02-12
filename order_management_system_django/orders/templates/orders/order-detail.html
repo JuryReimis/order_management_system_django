@@ -7,45 +7,45 @@
     <div>
         <ul>
             <li>
-                Id заказа: {{ order.pk }}
+                Id заказа: {{ order.order_id }}
             </li>
             <li>
-                Номер стола: {{ order.table_number }}
+                Номер стола: {{ order.order_table }}
             </li>
             <li>
                 Позиции:
                 <ul>
-                    {% for item in order.items.all %}
-                        <li>{{ item.title }} - {{ pk_price_dict|get:item.pk }} шт. по {{ item.price }}</li>
+                    {% for item in order.items %}
+                        <li>{{ item.title }} - {{ order.item_quantity_dict|get:item.dish_id }} шт. по {{ order.item_price_dict|get:item.dish_id }}</li>
                     {% endfor %}
                 </ul>
-                {% if order.status == order.PENDING %}
-                    <a href="{% url 'orders:change-order-items' order.pk %}">Изменить блюда в заказе</a>
+                {% if order.order_status == 0 %}
+                    <a href="{% url 'orders:change-order-items' order.order_id %}">Изменить блюда в заказе</a>
                 {% endif %}
 
             </li>
             <li>
-                Общая стоимость: {{ order.total_price }} Р
+                Общая стоимость: {{ order.order_total_price }} Р
             </li>
             <li>
-                Статус заказа: {{ order.get_status_display }}
+                Статус заказа: {{ order.order_status_display }}
             </li>
         </ul>
     </div>
 
-    <form method="post" action="{% url 'orders:order_delete' order.pk %}">
+    <form method="post" action="{% url 'orders:order_delete' order.order_id %}">
         {% csrf_token %}
         <button>Удалить заказ</button>
     </form>
 
-    <form method="post" action="{% url 'orders:order_change_status' order.pk %}">
+    <form method="post" action="{% url 'orders:order_change_status' order.order_id %}">
         {% csrf_token %}
-        {% if order.status != 0 %}
+        {% if order.order_status != 0 %}
             <button>Перевести в ожидание</button>
         {% endif %}
-        {% if order.status != 1 %}
+        {% if order.order_status != 1 %}
             <button name="ready">Заказ готов!</button>
-        {% elif order.status != 2 %}
+        {% elif order.order_status != 2 %}
             <button name="paid">Заказ оплачен!</button>
         {% endif %}
     </form>
