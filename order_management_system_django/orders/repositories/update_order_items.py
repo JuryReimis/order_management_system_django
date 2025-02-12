@@ -1,7 +1,7 @@
 from decimal import Decimal
 from typing import List
 
-from django.db import transaction, IntegrityError
+from django.db import transaction
 from django.utils import timezone
 
 from carte.models import Dish
@@ -47,6 +47,7 @@ class UpdateOrderItemsRepository:
 
         if self._order_items_to_create:
             OrderItems.objects.bulk_create(self._order_items_to_create)
+        self._order_items.last_update = timezone.now()
 
     def _update_total_price(self, total_price: Decimal):
         last_update = timezone.now()
@@ -73,7 +74,6 @@ class UpdateOrderItemsRepository:
     def save_items(self, table_number: int = None):
         if table_number is not None:
             self._order = self._create_items(table_number)
-            self._order_items.last_update = self._order.updated
         self._update_items()
 
     def update_order(self, total_price: Decimal):
