@@ -8,6 +8,6 @@ class OrderItemsDTO:
     r"""Data transfer object для передачи списка id блюд в заказе
     last_update должно быть присвоено значение последнего изменения списка блюд в заказе"""
 
-    order_id: int
+    order_id: int | None
     items_quantity_dict: Dict[int, int]
-    last_update: datetime
+    last_update: datetime | None
