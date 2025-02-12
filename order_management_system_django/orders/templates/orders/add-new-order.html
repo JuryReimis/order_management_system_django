@@ -4,7 +4,22 @@
 	<div>
         <form method="post">
             {% csrf_token %}
-            {{ form.as_p }}
+
+            <label for="id-table-number">Номер стола: </label>
+            <input type="number" required name="table_number" id="id-table-number">
+            <ul>
+                <h3>Можно добавить:</h3>
+                {% for dish in dishes %}
+                    <li>
+                        <input type="checkbox" id="checkbox_{{ dish.pk }}" name="items" value="{{ dish.pk }}">
+                        <label for="checkbox_{{ dish.pk }}">{{ dish.title }} - {{ dish.price }} Р</label>
+                        <div>
+                            <label for="id_item_{{ dish.pk }}">Количество блюд в заказе</label>
+                            <input type="number" value="1" min="0" id="id_item_{{ dish.pk }}" name="item_{{ dish.pk }}-quantity">
+                        </div>
+                    </li>
+                {% endfor %}
+            </ul>
             <button type="submit">Добавить</button>
         </form>
     </div>
