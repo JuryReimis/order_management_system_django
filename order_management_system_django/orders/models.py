@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils import timezone
 
 
 class Order(models.Model):
@@ -44,6 +45,11 @@ class Order(models.Model):
         verbose_name="Дата создания заказа"
     )
 
+    updated = models.DateTimeField(
+        default=timezone.now,
+        verbose_name="Последнее обновление"
+    )
+
     @classmethod
     def get_status_db(cls, new_status: str) -> int | None:
         for status in cls.STATUS:
@@ -79,11 +85,6 @@ class OrderItems(models.Model):
         on_delete=models.CASCADE,
         related_name="dish_items",
         verbose_name="Блюдо"
-    )
-
-    created = models.DateTimeField(
-        auto_now_add=True,
-        verbose_name="Время добавления блюда в заказ"
     )
 
     quantity = models.PositiveIntegerField(
