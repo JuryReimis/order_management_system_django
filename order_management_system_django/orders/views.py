@@ -1,12 +1,12 @@
 from typing import List
 
+from django.contrib import messages
 from django.db import IntegrityError
 from django.db.models import QuerySet
 from django.forms import formset_factory
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
-from django.utils import timezone
 from django.views import generic, View
 
 from carte.models import Dish
@@ -22,6 +22,32 @@ class CreateNewOrderView(generic.CreateView):
     template_name = 'orders/add-new-order.html'
     form_class = CreateNewOrderForm
     success_url = reverse_lazy('orders:create_order')
+
+    def get(self, request, *args, **kwargs):
+        dishes = Dish.objects.order_by('-price')
+        self.extra_context = {
+            'dishes': dishes
+        }
+        return super().get(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        items = request.POST.getlist('items')
+        if items:
+            dto = OrderItemsDTO(
+                order_id=None,
+                items_quantity_dict={int(item): int(request.POST.get(f'item_{item}-quantity', 1)) for item in items},
+                last_update=None
+            )
+            try:
+                service = UpdateOrderService(dto)
+                service.execute(request.POST.get('table_number'))
+            except IntegrityError:
+                messages.warning(request, "Уже существует неоплаченный заказ для этого стола")
+            except Exception as err:
+                messages.error(request, f"Непредвиденная ошибка {err}")
+        else:
+            messages.error(request=request, message="Заказ не может быть пустым")
+        return self.get(request, *args, **kwargs)
 
     def form_valid(self, form):
         try:
@@ -72,7 +98,7 @@ class OrderChangeItemsView(View):
             dto = OrderItemsDTO(
                 order_id=order_id,
                 items_quantity_dict={int(item): int(request.POST.get(f'item_{item}-quantity', 1)) for item in items},
-                last_update=timezone.now()
+                last_update=None
             )
             service = UpdateOrderService(dto)
             service.execute()
