@@ -85,3 +85,8 @@ class OrderItems(models.Model):
         auto_now_add=True,
         verbose_name="Время добавления блюда в заказ"
     )
+
+    quantity = models.PositiveIntegerField(
+        default=1,
+        verbose_name="Количество блюд в заказе"
+    )
