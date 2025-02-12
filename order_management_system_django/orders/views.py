@@ -45,6 +45,8 @@ class CreateNewOrderView(generic.CreateView):
                 messages.warning(request, "Уже существует неоплаченный заказ для этого стола")
             except Exception as err:
                 messages.error(request, f"Непредвиденная ошибка {err}")
+            finally:
+                messages.success(request, "Заказ успешно создан")
         else:
             messages.error(request=request, message="Заказ не может быть пустым")
         return self.get(request, *args, **kwargs)
@@ -100,8 +102,15 @@ class OrderChangeItemsView(View):
                 items_quantity_dict={int(item): int(request.POST.get(f'item_{item}-quantity', 1)) for item in items},
                 last_update=None
             )
-            service = UpdateOrderService(dto)
-            service.execute()
+            try:
+                service = UpdateOrderService(dto)
+                service.execute()
+            except ValueError as err:
+                messages.error(request, f"Произошла ошибка {err}")
+            except Exception as err:
+                messages.error(request, f"Произошла непредвиденная ошибка {err}")
+            finally:
+                messages.success(request, "Изменение заказа произошло успешно!")
         else:
             raise Http404(f"Не получены данные, необходимые для обновления id = {order_id}, выбранные блюда = {items}")
 
