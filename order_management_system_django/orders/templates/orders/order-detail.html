@@ -1,5 +1,7 @@
 {% extends 'base.html' %}
 
+{% load orders_filters %}
+
 {% block body %}
 
     <div>
@@ -14,9 +16,8 @@
                 Позиции:
                 <ul>
                     {% for item in order.items.all %}
-                        <li>{{ item }}</li>
+                        <li>{{ item.title }} - {{ pk_price_dict|get:item.pk }} шт. по {{ item.price }}</li>
                     {% endfor %}
-
                 </ul>
                 {% if order.status == order.PENDING %}
                     <a href="{% url 'orders:change-order-items' order.pk %}">Изменить блюда в заказе</a>
