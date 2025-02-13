@@ -1,11 +1,32 @@
 {% extends 'base.html' %}
 
 {% block body %}
-    <ul>
-        {% for dish in dishes %}
-            <li><a href="{% url 'carte:dish_detail' dish.pk %}">{{ dish.title }} - {{ dish.price }}</a></li>
-        {% endfor %}
-    </ul>
+    <div class="container mt-4">
+        <h2 class="mb-4">Список блюд</h2>
+        <div class="row">
+            {% for dish in dishes %}
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ dish.title }}</h5>
+                            <p class="card-text">
+                                <strong>Цена:</strong> {{ dish.price }} Р
+                            </p>
+                            <a href="{% url 'carte:dish_detail' dish.pk %}" class="btn btn-primary">
+                                Подробнее
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% empty %}
+                <div class="col-12">
+                    <div class="alert alert-info" role="alert">
+                        Блюд нет.
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
 
 {% endblock %}
 

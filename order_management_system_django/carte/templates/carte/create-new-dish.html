@@ -1,11 +1,34 @@
 {% extends 'base.html' %}
 
 {% block body %}
-    <div>
+    <div class="container mt-4">
+        <h2 class="mb-4">Добавить блюдо</h2>
         <form method="post">
             {% csrf_token %}
-            {{ form.as_p }}
-            <button type="submit">Добавить</button>
+
+            <div class="mb-3">
+                <label for="{{ form.title.id_for_label }}" class="form-label">Название блюда</label>
+                {{ form.title }}
+                {% if form.title.errors %}
+                    <div class="invalid-feedback">
+                        {{ form.title.errors }}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="mb-3">
+                <label for="{{ form.price.id_for_label }}" class="form-label">Цена</label>
+                {{ form.price }}
+                {% if form.price.errors %}
+                    <div class="invalid-feedback">
+                        {{ form.price.errors }}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="text-center">
+                <button type="submit" class="btn btn-primary">Добавить</button>
+            </div>
         </form>
     </div>
 {% endblock %}

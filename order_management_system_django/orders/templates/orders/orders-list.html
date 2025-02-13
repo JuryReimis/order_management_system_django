@@ -1,14 +1,71 @@
 {% extends 'base.html' %}
 
 {% block body %}
-    <div>
-        <ul>
-            {% for order in orders %}
-                <li>
-                    <a href="{% url 'orders:order_detail' order.pk %}">Заказ для стола {{ order.table_number }}</a>
-                </li>
-            {% endfor %}
-        </ul>
+    <div class="container mt-4">
+    <h2 class="mb-4">Список заказов</h2>
+
+    <!-- Форма для фильтрации и сортировки -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" action="{% url 'orders:order_search' %}" class="row g-3">
+                <div class="col-md-3">
+                    <label for="id_table" class="form-label">Номер стола</label>
+                    <input type="number" class="form-control" id="id_table" name="table" value="{{ request.GET.table }}">
+                </div>
+
+                <div class="col-md-3">
+                    <label for="id_status" class="form-label">Статус заказа</label>
+                    <select class="form-select" id="id_status" name="status">
+                        <option value="">Все</option>
+                        <option value="0" {% if request.GET.status == "0" %}selected{% endif %}>Ожидание</option>
+                        <option value="1" {% if request.GET.status == "1" %}selected{% endif %}>Готов</option>
+                        <option value="2" {% if request.GET.status == "2" %}selected{% endif %}>Оплачен</option>
+                    </select>
+                </div>
+
+                <div class="col-md-3">
+                    <label for="sort" class="form-label">Сортировка</label>
+                    <select class="form-select" id="sort" name="sort">
+                        <option value="">По умолчанию</option>
+                        <option value="table_number" {% if request.GET.sort == "table_number" %}selected{% endif %}>По номеру стола</option>
+                        <option value="-table_number" {% if request.GET.sort == "-table_number" %}selected{% endif %}>По номеру стола (убыв.)</option>
+                        <option value="total_price" {% if request.GET.sort == "total_price" %}selected{% endif %}>По стоимости</option>
+                        <option value="-total_price" {% if request.GET.sort == "-total_price" %}selected{% endif %}>По стоимости (убыв.)</option>
+                    </select>
+                </div>
+
+                <div class="col-md-3 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary me-2">Применить</button>
+                    <a href="{% url 'orders:get_all_orders' %}" class="btn btn-outline-secondary">Сбросить</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="row">
+        {% for order in orders %}
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">Заказ для стола {{ order.table_number }}</h5>
+                        <p class="card-text">
+                            <strong>Статус:</strong> {{ order.get_status_display }}<br>
+                            <strong>Общая стоимость:</strong> {{ order.total_price }} Р
+                        </p>
+                        <a href="{% url 'orders:order_detail' order.pk %}" class="btn btn-primary">
+                            Подробнее
+                        </a>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="col-12">
+                <div class="alert alert-info" role="alert">
+                    Заказов не найдено.
+                </div>
+            </div>
+        {% endfor %}
+    </div>
     </div>
 {% endblock %}
 

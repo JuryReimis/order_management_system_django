@@ -1,25 +1,40 @@
 {% extends 'base.html' %}
 
 {% block body %}
-    <div>
-        <ul>
-            <li>
-                Название: {{ dish.title }}
-                <form method="post">
-                    {% csrf_token %}
-                    <label for="new-title">Сменить название</label>
-                    <input id="new-title" name="new_title" type="text">
-                    <button type="submit">Применить</button>
-                </form>
+    <div class="container mt-4">
+        <h2 class="mb-4">Редактирование блюда</h2>
+        <ul class="list-group">
+
+            <li class="list-group-item">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <strong>Название:</strong> {{ dish.title }}
+                    </div>
+                    <form method="post" class="d-flex align-items-center">
+                        {% csrf_token %}
+                        <div class="me-2">
+                            <label for="new-title" class="form-label">Сменить название</label>
+                            <input id="new-title" name="new_title" type="text" class="form-control">
+                        </div>
+                        <button type="submit" class="btn btn-sm btn-outline-primary">Применить</button>
+                    </form>
+                </div>
             </li>
-            <li>
-                Цена: {{ dish.price }}
-                <form method="post">
-                    {% csrf_token %}
-                    <label for="new-price">Новая цена</label>
-                    <input id="new-price" name="new_price" type="text">
-                    <button type="submit">Применить</button>
-                </form>
+
+            <li class="list-group-item">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <strong>Цена:</strong> {{ dish.price }} Р
+                    </div>
+                    <form method="post" class="d-flex align-items-center">
+                        {% csrf_token %}
+                        <div class="me-2">
+                            <label for="new-price" class="form-label">Новая цена</label>
+                            <input id="new-price" name="new_price" type="text" class="form-control">
+                        </div>
+                        <button type="submit" class="btn btn-sm btn-outline-primary">Применить</button>
+                    </form>
+                </div>
             </li>
         </ul>
     </div>
