@@ -53,7 +53,7 @@ class Order(models.Model):
     @classmethod
     def get_status_db(cls, new_status: str) -> int | None:
         for status in cls.STATUS:
-            if status[1].lower() == new_status:
+            if status[1].lower() == new_status or str(status[0]) == new_status:
                 return status[0]
         return None
 
