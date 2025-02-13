@@ -1,4 +1,5 @@
-from django.shortcuts import get_object_or_404
+from django.contrib import messages
+from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.views import generic
 
@@ -10,6 +11,16 @@ class AddNewDishView(generic.CreateView):
     template_name = 'carte/create-new-dish.html'
     form_class = DishForm
     success_url = reverse_lazy('carte:create_dish')
+
+    def post(self, request, *args, **kwargs):
+        try:
+            method = super().post(request, *args, **kwargs)
+        except Exception as err:
+            messages.error(request, f"Произошла ошибка {err}")
+        else:
+            messages.success(request, f"Новое блюдо добавлено")
+            return method
+        return redirect('carte:get_all_dishes')
 
 
 class DishDetailView(generic.DetailView):
@@ -29,7 +40,7 @@ class DishDetailView(generic.DetailView):
 
 
 class GetAllDishesView(generic.ListView):
-    paginate_by = 10
+    paginate_by = 9
     context_object_name = 'dishes'
     template_name = 'carte/dish-list.html'
 
