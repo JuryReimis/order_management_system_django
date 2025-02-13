@@ -50,7 +50,7 @@ class CreateNewOrderView(generic.CreateView):
                 messages.warning(request, "Уже существует неоплаченный заказ для этого стола")
             except Exception as err:
                 messages.error(request, f"Непредвиденная ошибка {err}")
-            finally:
+            else:
                 messages.success(request, "Заказ успешно создан")
         else:
             messages.error(request=request, message="Заказ не может быть пустым")
@@ -65,7 +65,7 @@ class CreateNewOrderView(generic.CreateView):
 
 
 class GetAllOrdersView(generic.ListView):
-    paginate_by = 10
+    paginate_by = 9
     context_object_name = 'orders'
     template_name = 'orders/orders-list.html'
 
@@ -139,7 +139,7 @@ class OrderChangeItemsView(View):
                 messages.error(request, f"Произошла ошибка {err}")
             except Exception as err:
                 messages.error(request, f"Произошла непредвиденная ошибка {err}")
-            finally:
+            else:
                 messages.success(request, "Изменение заказа произошло успешно!")
         else:
             raise Http404(f"Не получены данные, необходимые для обновления id = {order_id}, выбранные блюда = {items}")
@@ -175,14 +175,17 @@ class OrderChangeItemsView(View):
 class OrderChangeStatusView(View):
 
     def post(self, request, *args, **kwargs):
-        obj = self.get_object()
-        new_status = Order.PENDING
-        if 'ready' in request.POST:
-            new_status = Order.READY
-        elif 'paid' in request.POST:
-            new_status = Order.PAID
-        self.save_new_status(obj, new_status)
-        return redirect('orders:order_detail', pk=kwargs.get('pk'))
+        try:
+            obj = self.get_object()
+            new_status = Order.PENDING
+            if 'ready' in request.POST:
+                new_status = Order.READY
+            elif 'paid' in request.POST:
+                new_status = Order.PAID
+            self.save_new_status(obj, new_status)
+        except IntegrityError as err:
+            messages.warning(request, f"Уже имеется неоплаченный заказ на этом столе")
+        return redirect('orders:order_detail', pk=kwargs['pk'])
 
     @staticmethod
     def save_new_status(obj: Order, status: Order.STATUS):
@@ -195,7 +198,7 @@ class OrderChangeStatusView(View):
 
 
 class OrderSearchView(generic.ListView):
-    paginate_by = 10
+    paginate_by = 9
     context_object_name = 'orders'
     template_name = 'orders/orders-list.html'
 
@@ -211,5 +214,8 @@ class OrderSearchView(generic.ListView):
 
     def get_queryset(self):
         filter_opt = self.kwargs.pop('filter_opt')
-        order = Order.objects.filter(filter_opt).order_by('-created')
+        order_by = self.request.GET.get('sort')
+        if not order_by:
+            order_by = '-created'
+        order = Order.objects.filter(filter_opt).order_by(order_by)
         return order
