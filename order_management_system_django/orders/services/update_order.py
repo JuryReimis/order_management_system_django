@@ -1,24 +1,28 @@
 from django.db import transaction
 
-from carte.repositories.dish_price_repository import DishPriceRepository
 from orders.dto.order_items import OrderItemsDTO
-from orders.repositories.update_order_items import UpdateOrderItemsRepository
 from orders.services.calculate_total_price import CalculateTotalPriceService
 
 
 class UpdateOrderService:
 
-    def __init__(self, order_items_dto: OrderItemsDTO):
+    def __init__(self, order_items_dto: OrderItemsDTO, order_repository, update_order_items_repository,
+                 dish_price_repository):
+        self._update_order_items_repository = update_order_items_repository
+        self._order_repository = order_repository
+        self._price_repository = dish_price_repository
         self._order_items_dto = order_items_dto
 
-    def execute(self, table_number: int | None = None):
+    def execute(self):
         """Обновляет элементы заказа и пересчитывает общую стоимость."""
 
         with transaction.atomic():
-            repository = UpdateOrderItemsRepository(self._order_items_dto)
-            repository.save_items(table_number)
+            order_repository = self._order_repository(self._order_items_dto)
 
-            price_repository = DishPriceRepository()
+            update_items_repository = self._update_order_items_repository(self._order_items_dto)
+            update_items_repository.save_items()
+
+            price_repository = self._price_repository()
             total_price = CalculateTotalPriceService().execute(self._order_items_dto, price_repository)
 
-            repository.update_order(total_price)
+            order_repository.update_order(total_price=total_price)
