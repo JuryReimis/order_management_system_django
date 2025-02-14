@@ -39,6 +39,13 @@ class DishDetailView(generic.DetailView):
         return self.get(request, args, kwargs)
 
 
+class DishDeleteView(generic.DeleteView):
+    model = Dish
+    context_object_name = 'dish'
+    template_name = 'carte/delete-dish-confirm.html'
+    success_url = reverse_lazy('carte:get_all_dishes')
+
+
 class GetAllDishesView(generic.ListView):
     paginate_by = 9
     context_object_name = 'dishes'
