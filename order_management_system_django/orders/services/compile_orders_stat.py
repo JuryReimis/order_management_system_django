@@ -1,3 +1,4 @@
+import decimal
 from decimal import Decimal
 from typing import List
 
@@ -23,7 +24,7 @@ class CompileOrdersStatService:
 
     @staticmethod
     def _get_avg_total_price(sum_price: Decimal, amount: int) -> Decimal:
-        return sum_price/amount
+        return (sum_price / amount).quantize(Decimal('0.00'), rounding=decimal.ROUND_HALF_UP)
 
     def _get_paid_order_stat(self, dates: DatesQueryDTO) -> List[OrderDTO]:
         return self._repository.get_paided_orders_range_dates(dates)
