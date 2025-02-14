@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block body %}
+    <div class="container mt-4">
+    <h2 class="mb-4">Удаление блюда</h2>
+    <form method="post">
+        {% csrf_token %}
+        <div class="card">
+            <div class="card-body">
+                <h4 class="card-title">Вы уверены, что хотите удалить блюдо "{{ dish.title }}" за {{ dish.price }} ₽?</h4>
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-danger me-2">
+                        Да, удалить
+                    </button>
+                    <a href="{% url 'carte:dish_detail' dish.pk %}" class="btn btn-outline-secondary">
+                        Отмена
+                    </a>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}
