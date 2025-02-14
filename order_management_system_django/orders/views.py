@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import List
 
 from django.contrib import messages
@@ -7,18 +8,22 @@ from django.forms import formset_factory
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
+from django.utils import timezone
 from django.views import generic, View
 
 from carte.models import Dish
 from carte.repositories.dish import DishRepository
 from carte.repositories.price_changes import PriceChangesRepository
+from orders.dto.dates_query import DatesQueryDTO
 from orders.dto.order import OrderDTO
 from orders.dto.order_items import OrderItemsDTO
 from orders.dto.search_query import SearchQueryDTO
-from orders.forms import CreateNewOrderForm, UpdateOrderItemsForm, UpdateQuantityForm
+from orders.forms import CreateNewOrderForm, UpdateOrderItemsForm, UpdateQuantityForm, DateRangeForm
 from orders.models import Order, OrderItems
 from orders.repositories.order import OrderRepository
+from orders.repositories.orders_filter import OrdersFilterRepository
 from orders.services.compile_order_filter import CompileOrderFilterService
+from orders.services.compile_orders_stat import CompileOrdersStatService
 from orders.services.get_detail_order_context import GetDetailOrderContextService
 from orders.services.update_order import UpdateOrderService
 
@@ -203,8 +208,8 @@ class OrderSearchView(generic.ListView):
     template_name = 'orders/orders-list.html'
 
     def get(self, request, *args, **kwargs):
-        table = request.GET.get('table')
-        status = request.GET.get('status')
+        table = str(request.GET.get('table'))
+        status = str(request.GET.get('status'))
         service = CompileOrderFilterService()
         query = SearchQueryDTO(table=table, status=status)
         callback = service.execute(query)
@@ -219,3 +224,34 @@ class OrderSearchView(generic.ListView):
             order_by = '-created'
         order = Order.objects.filter(filter_opt).order_by(order_by)
         return order
+
+
+class GetOrdersStatsView(View):
+    template_name = 'orders/orders_stats.html'
+    form: DateRangeForm = DateRangeForm
+
+    def get(self, request, *args, **kwargs):
+        form = self.form(request.GET)
+        context = {
+            'form': form
+        }
+
+        start_date_str = request.GET.get('start_date')
+        end_date_str = request.GET.get('end_date')
+
+        if start_date_str and end_date_str:
+            if form.is_valid():
+                start_date = timezone.make_aware(datetime.fromisoformat(start_date_str))
+                end_date = timezone.make_aware(datetime.fromisoformat(end_date_str))
+                dto = DatesQueryDTO(
+                    start_date=start_date,
+                    end_date=end_date
+                )
+                repository = OrdersFilterRepository()
+                service = CompileOrdersStatService(repository)
+                context['statistic'] = service.execute(dto)
+            else:
+                messages.error(request, f"Произошла ошибка\n{form.errors}")
+
+        return render(request, self.template_name, context=context)
+
