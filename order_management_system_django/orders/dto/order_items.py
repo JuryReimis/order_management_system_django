@@ -11,3 +11,4 @@ class OrderItemsDTO:
     order_id: int | None
     items_quantity_dict: Dict[int, int]
     last_update: datetime | None
+    table_number: int | None = None
