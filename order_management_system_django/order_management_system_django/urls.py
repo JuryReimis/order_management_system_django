@@ -6,6 +6,7 @@ from order_management_system_django import settings
 urlpatterns = [
     path('orders/', include('orders.urls')),
     path('carte/', include('carte.urls')),
+    path('', include('carte.api.v1.urls')),
     path('admin/', admin.site.urls),
 ]
 
