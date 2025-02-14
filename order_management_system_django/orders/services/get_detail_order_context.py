@@ -9,16 +9,16 @@ from orders.dto.order import OrderDTO
 
 class GetDetailOrderContextService:
 
-    def __init__(self, order_repository, items_repository, price_changes_repository):
+    def __init__(self, order_repository, dish_repository, price_changes_repository):
         self._order_repository = order_repository
-        self._items_repository = items_repository
+        self._dish_repository = dish_repository
         self._price_changes_repository = price_changes_repository
 
-    def _get_order_context(self, order_id: int) -> OrderDTO:
-        return self._order_repository(order_id).get_order_data()
+    def _get_order_context(self, order: OrderDTO) -> OrderDTO:
+        return self._order_repository(order).get_order_data()
 
-    def _get_items_context(self, order_id: int) -> List[DishDTO]:
-        return self._items_repository(order_id).get_items_data()
+    def _get_items_context(self, order: OrderDTO) -> List[DishDTO]:
+        return self._dish_repository(order.order_id).get_items_data()
 
     def _get_price_changes_context(self, ids: List[int], last_update) -> List[ActualPriceDTO]:
         dto = DishListUpdateTimeDTO(
@@ -28,8 +28,8 @@ class GetDetailOrderContextService:
         return self._price_changes_repository().get_actual_price_by_time(dto)
 
     def execute(self, order: OrderDTO) -> OrderContextDTO:
-        order_data = self._get_order_context(order.order_id)
-        items_data = self._get_items_context(order.order_id)
+        order_data = self._get_order_context(order)
+        items_data = self._get_items_context(order)
         price_changes_data = self._get_price_changes_context(ids=order_data.items, last_update=order_data.updated)
 
         return OrderContextDTO(
