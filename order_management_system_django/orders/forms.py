@@ -33,16 +33,14 @@ class DateRangeForm(forms.Form):
         label="Начальная дата",
         widget=forms.DateTimeInput(attrs={'type': 'datetime-local'}),
         validators=[
-            MinValueValidator(limit_value=timezone.make_aware(datetime(2000, 1, 1))),
-            MaxValueValidator(limit_value=timezone.now())
+            MinValueValidator(limit_value=timezone.make_aware(datetime(2000, 1, 1)))
         ]
     )
     end_date = forms.DateTimeField(
         label="Конечная дата",
         widget=forms.DateTimeInput(attrs={'type': 'datetime-local'}),
         validators=[
-            MinValueValidator(limit_value=timezone.make_aware(datetime(2000, 1, 1))),
-            MaxValueValidator(limit_value=timezone.now())
+            MinValueValidator(limit_value=timezone.make_aware(datetime(2000, 1, 1)))
         ]
     )
 
