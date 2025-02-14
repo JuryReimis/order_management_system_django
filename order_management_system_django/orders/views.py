@@ -13,6 +13,7 @@ from django.views import generic, View
 
 from carte.models import Dish
 from carte.repositories.dish import DishRepository
+from carte.repositories.dish_price_repository import DishPriceRepository
 from carte.repositories.price_changes import PriceChangesRepository
 from orders.dto.dates_query import DatesQueryDTO
 from orders.dto.order import OrderDTO
@@ -22,6 +23,7 @@ from orders.forms import CreateNewOrderForm, UpdateOrderItemsForm, UpdateQuantit
 from orders.models import Order, OrderItems
 from orders.repositories.order import OrderRepository
 from orders.repositories.orders_filter import OrdersFilterRepository
+from orders.repositories.update_order_items import UpdateOrderItemsRepository
 from orders.services.compile_order_filter import CompileOrderFilterService
 from orders.services.compile_orders_stat import CompileOrdersStatService
 from orders.services.get_detail_order_context import GetDetailOrderContextService
@@ -43,22 +45,28 @@ class CreateNewOrderView(generic.CreateView):
     def post(self, request, *args, **kwargs):
         items = request.POST.getlist('items')
         if items:
+            order_repository = OrderRepository
+            update_order_items_repository = UpdateOrderItemsRepository
+            dish_price_repository = DishPriceRepository
             dto = OrderItemsDTO(
                 order_id=None,
                 items_quantity_dict={int(item): int(request.POST.get(f'item_{item}-quantity', 1)) for item in items},
-                last_update=None
+                last_update=None,
+                table_number=request.POST.get('table_number')
             )
             try:
-                service = UpdateOrderService(dto)
-                service.execute(request.POST.get('table_number'))
+                service = UpdateOrderService(order_items_dto=dto, order_repository=order_repository,
+                                             update_order_items_repository=update_order_items_repository,
+                                             dish_price_repository=dish_price_repository)
+                service.execute()
             except IntegrityError:
-                messages.warning(request, "Уже существует неоплаченный заказ для этого стола")
+                messages.error(request, "Уже существует неоплаченный заказ для этого стола", extra_tags='danger')
             except Exception as err:
                 messages.error(request, f"Непредвиденная ошибка {err}")
             else:
                 messages.success(request, "Заказ успешно создан")
         else:
-            messages.error(request=request, message="Заказ не может быть пустым")
+            messages.error(request=request, message="Заказ не может быть пустым", extra_tags='danger')
         return self.get(request, *args, **kwargs)
 
     def form_valid(self, form):
@@ -95,17 +103,17 @@ class OrderDetailView(generic.DetailView):
             total_price=None
         )
         order_repository = OrderRepository
-        items_repository = DishRepository
+        dish_repository = DishRepository
         price_changes_repository = PriceChangesRepository
         try:
-            service = GetDetailOrderContextService(order_repository=order_repository, items_repository=items_repository,
+            service = GetDetailOrderContextService(order_repository=order_repository, dish_repository=dish_repository,
                                                    price_changes_repository=price_changes_repository)
             obj = service.execute(order=dto)
             return obj
         except ValueError as err:
-            messages.error(self.request, f"Произошла ошибка {err}")
+            messages.error(self.request, f"Произошла ошибка {err}", extra_tags='danger')
         except Exception as err:
-            messages.error(self.request, f"Непредвиденная ошибка {err}")
+            messages.error(self.request, f"Непредвиденная ошибка {err}", extra_tags='danger')
         return redirect('orders:get_all_orders')
 
 
@@ -138,12 +146,17 @@ class OrderChangeItemsView(View):
                 last_update=None
             )
             try:
-                service = UpdateOrderService(dto)
+                order_repository = OrderRepository
+                update_order_items_repository = UpdateOrderItemsRepository
+                dish_price_repository = DishPriceRepository
+                service = UpdateOrderService(order_items_dto=dto, order_repository=order_repository,
+                                             update_order_items_repository=update_order_items_repository,
+                                             dish_price_repository=dish_price_repository)
                 service.execute()
             except ValueError as err:
-                messages.error(request, f"Произошла ошибка {err}")
+                messages.error(request, f"Произошла ошибка {err}", extra_tags='danger')
             except Exception as err:
-                messages.error(request, f"Произошла непредвиденная ошибка {err}")
+                messages.error(request, f"Произошла непредвиденная ошибка {err}", extra_tags='danger')
             else:
                 messages.success(request, "Изменение заказа произошло успешно!")
         else:
@@ -166,9 +179,10 @@ class OrderChangeItemsView(View):
         }
         return context
 
-    def get_formset(self, order_items: QuerySet[OrderItems]):
-        UpdateQuantityFormSet = formset_factory(UpdateQuantityForm, extra=0)
-        return UpdateQuantityFormSet(
+    @staticmethod
+    def get_formset(order_items: QuerySet[OrderItems]):
+        update_quantity_formset = formset_factory(UpdateQuantityForm, extra=0)
+        return update_quantity_formset(
             initial=[{'quantity': item.quantity,
                       'dish_id': item.dish_id} for item in order_items]
         )
@@ -189,7 +203,7 @@ class OrderChangeStatusView(View):
                 new_status = Order.PAID
             self.save_new_status(obj, new_status)
         except IntegrityError as err:
-            messages.warning(request, f"Уже имеется неоплаченный заказ на этом столе")
+            messages.warning(request, f"Уже имеется неоплаченный заказ на этом столе {err}")
         return redirect('orders:order_detail', pk=kwargs['pk'])
 
     @staticmethod
@@ -243,15 +257,15 @@ class GetOrdersStatsView(View):
             if form.is_valid():
                 start_date = timezone.make_aware(datetime.fromisoformat(start_date_str))
                 end_date = timezone.make_aware(datetime.fromisoformat(end_date_str))
-                dto = DatesQueryDTO(
-                    start_date=start_date,
-                    end_date=end_date
-                )
-                repository = OrdersFilterRepository()
-                service = CompileOrdersStatService(repository)
-                context['statistic'] = service.execute(dto)
-            else:
-                messages.error(request, f"Произошла ошибка\n{form.errors}")
+                try:
+                    dto = DatesQueryDTO(
+                        start_date=start_date,
+                        end_date=end_date
+                    )
+                    repository = OrdersFilterRepository()
+                    service = CompileOrdersStatService(repository)
+                    context['statistic'] = service.execute(dto)
+                except Exception as err:
+                    messages.error(request, f"Произошла ошибка\n{err}", extra_tags='danger')
 
         return render(request, self.template_name, context=context)
-
