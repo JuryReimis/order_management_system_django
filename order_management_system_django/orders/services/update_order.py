@@ -25,4 +25,4 @@ class UpdateOrderService:
             price_repository = self._price_repository()
             total_price = CalculateTotalPriceService().execute(self._order_items_dto, price_repository)
 
-            order_repository.update_order(total_price=total_price)
+            order_repository.update_order(total_price=total_price, new_status=self._order_items_dto.new_status)
