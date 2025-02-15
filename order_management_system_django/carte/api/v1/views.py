@@ -5,6 +5,9 @@ from carte.api.v1.serializers import DishSerializer
 from carte.models import Dish
 
 
+# Эндпоинты для доступа к апи проекта
+
+
 class CreateDishAPIView(CreateAPIView):
     serializer_class = DishSerializer
 
