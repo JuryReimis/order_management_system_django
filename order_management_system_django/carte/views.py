@@ -34,8 +34,9 @@ class DishDetailView(generic.DetailView):
         form = DishForm(instance=dish, data={'price': price, 'title': title})
         if form.is_valid():
             form.save()
+            messages.success(request, "Изменения успешно приняты")
         else:
-            print(form.errors)
+            messages.warning(request, "Ошибка в заполнении формы")
         return self.get(request, args, kwargs)
 
 
