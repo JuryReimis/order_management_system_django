@@ -8,6 +8,7 @@ from orders.dto.order import OrderDTO
 
 
 class CompileOrdersStatService:
+    r"""Сервис для вычисления статистики за период"""
     def __init__(self, repository):
         self._repository = repository
 

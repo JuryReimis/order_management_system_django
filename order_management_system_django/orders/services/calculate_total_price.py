@@ -8,6 +8,7 @@ from orders.dto.order_items import OrderItemsDTO
 
 
 class CalculateTotalPriceService:
+    r"""Сервис для подсчета общей цены заказа"""
 
     def _get_price_list(self, dto, repository) -> List[DishPriceDTO]:
         return repository.get_prices(dto)

@@ -8,6 +8,7 @@ from orders.dto.order import OrderDTO
 
 
 class GetDetailOrderContextService:
+    r"""Формирование контекста для детального представления."""
 
     def __init__(self, order_repository, dish_repository, price_changes_repository):
         self._order_repository = order_repository

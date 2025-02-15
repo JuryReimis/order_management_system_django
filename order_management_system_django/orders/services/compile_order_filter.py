@@ -8,6 +8,10 @@ from orders.models import Order
 
 
 class CompileOrderFilterService:
+    r"""Формирует фильтр для поиска по заказам
+    На вход поступает объект со строками.
+    В строке могут быть перечислены несколько столов и несколько таблиц
+    Должны быть разделены запятыми"""
 
     def __init__(self):
         self.errors = []
@@ -17,11 +21,13 @@ class CompileOrderFilterService:
         self.errors.append(text)
 
     def _compile_table_number_filter(self, tables: List[int]) -> Q:
+        r"""Компиляция фильтра по списку номеров столов"""
         if tables:
             return Q(table_number__in=tables)
         return Q()
 
     def _parse_str_to_int_list(self, query: str) -> list | List[int]:
+        r"""Парсим строку со списком столов на список int значений """
         try:
             return list(map(int, query.replace(' ', '').split(',')))
         except ValueError:
@@ -29,6 +35,7 @@ class CompileOrderFilterService:
             return []
 
     def _compile_status_filter(self, status_list: List[int]):
+        r"""Компиляция фильтра на основе списка статусов"""
         if status_list:
             return Q(status__in=status_list)
         return Q()
@@ -42,6 +49,7 @@ class CompileOrderFilterService:
         return valid_status_list
 
     def _parse_status_in_list(self, status: str) -> List[str]:
+        r"""Парсим строку статусов на список статусов"""
         status_list = status.split(',')
         return status_list
 

@@ -5,6 +5,7 @@ from orders.services.calculate_total_price import CalculateTotalPriceService
 
 
 class UpdateOrderService:
+    r"""Сервис для обновления и создания заказа"""
 
     def __init__(self, order_items_dto: OrderItemsDTO, order_repository, update_order_items_repository,
                  dish_price_repository):
