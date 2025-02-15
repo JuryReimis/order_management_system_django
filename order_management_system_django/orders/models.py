@@ -1,6 +1,8 @@
 from django.db import models
 from django.utils import timezone
 
+# Модели для приложения orders
+
 
 class Order(models.Model):
     PENDING = 0
@@ -65,6 +67,7 @@ class Order(models.Model):
         verbose_name_plural = "Заказы"
         constraints = [
             models.UniqueConstraint(
+                # Ограничение. Накладывается на table_number, если статус одной из записей не PAID
                 name='unique_table_number_for_unpaid_orders',
                 fields=['table_number'],
                 condition=models.Q(status__in=[0, 1])
