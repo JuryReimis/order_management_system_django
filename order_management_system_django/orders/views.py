@@ -12,21 +12,16 @@ from django.utils import timezone
 from django.views import generic, View
 
 from carte.models import Dish
-from carte.repositories.dish import DishRepository
 from carte.repositories.dish_price_repository import DishPriceRepository
-from carte.repositories.price_changes import PriceChangesRepository
 from orders.dto.dates_query import DatesQueryDTO
-from orders.dto.order import OrderDTO
 from orders.dto.order_items import OrderItemsDTO
-from orders.dto.search_query import SearchQueryDTO
 from orders.forms import CreateNewOrderForm, UpdateOrderItemsForm, UpdateQuantityForm, DateRangeForm
+from orders.mixins import GetOrdersListMixin, GetOrderDetailMixin
 from orders.models import Order, OrderItems
 from orders.repositories.order import OrderRepository
 from orders.repositories.orders_filter import OrdersFilterRepository
 from orders.repositories.update_order_items import UpdateOrderItemsRepository
-from orders.services.compile_order_filter import CompileOrderFilterService
 from orders.services.compile_orders_stat import CompileOrdersStatService
-from orders.services.get_detail_order_context import GetDetailOrderContextService
 from orders.services.update_order import UpdateOrderService
 
 
@@ -87,29 +82,16 @@ class GetAllOrdersView(generic.ListView):
         return orders
 
 
-class OrderDetailView(generic.DetailView):
+class OrderDetailView(GetOrderDetailMixin, generic.DetailView):
     model = Order
     template_name = 'orders/order-detail.html'
     context_object_name = 'order'
 
-    def get_object(self, queryset=None):
-        dto = OrderDTO(
-            order_id=self.kwargs['pk'],
-            status_display=None,
-            updated=None,
-            table_number=None,
-            status=None,
-            items=None,
-            total_price=None
-        )
-        order_repository = OrderRepository
-        dish_repository = DishRepository
-        price_changes_repository = PriceChangesRepository
+    def get(self, request, *args, **kwargs):
         try:
-            service = GetDetailOrderContextService(order_repository=order_repository, dish_repository=dish_repository,
-                                                   price_changes_repository=price_changes_repository)
-            obj = service.execute(order=dto)
-            return obj
+            return super().get(request, *args, **kwargs)
+        except Http404 as err:
+            raise Http404(err)
         except ValueError as err:
             messages.error(self.request, f"Произошла ошибка {err}", extra_tags='danger')
         except Exception as err:
@@ -216,28 +198,10 @@ class OrderChangeStatusView(View):
         return order
 
 
-class OrderSearchView(generic.ListView):
+class OrderSearchView(GetOrdersListMixin, generic.ListView):
     paginate_by = 9
     context_object_name = 'orders'
     template_name = 'orders/orders-list.html'
-
-    def get(self, request, *args, **kwargs):
-        table = str(request.GET.get('table'))
-        status = str(request.GET.get('status'))
-        service = CompileOrderFilterService()
-        query = SearchQueryDTO(table=table, status=status)
-        callback = service.execute(query)
-        filter_opt = callback.filter
-        self.kwargs['filter_opt'] = filter_opt
-        return super().get(request, args, kwargs)
-
-    def get_queryset(self):
-        filter_opt = self.kwargs.pop('filter_opt')
-        order_by = self.request.GET.get('sort')
-        if not order_by:
-            order_by = '-created'
-        order = Order.objects.filter(filter_opt).order_by(order_by)
-        return order
 
 
 class GetOrdersStatsView(View):
