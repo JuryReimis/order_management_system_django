@@ -9,6 +9,10 @@ from carte.models import DishPriceChanges
 
 
 class PriceChangesRepository:
+    r"""Получение списка объектов с актуальной ценой и id блюда
+    Идентичен DishPriceRepository, но задействует другой набор данных для выдачи информации
+
+    !!!Разобраться, какой из репозиториев оставить. Задачи одни и те же."""
 
     @staticmethod
     def get_subquery(actual_time: datetime):
