@@ -2,6 +2,9 @@ from django.db import models
 
 
 class Dish(models.Model):
+    r"""Модель блюда.
+    При сохранении проверяет, была ли изменена цена, если да,
+    записывает информацию об изменении в модель DishPriceChanges"""
 
     title = models.CharField(
         max_length=150,
@@ -44,6 +47,8 @@ class Dish(models.Model):
 
 
 class DishPriceChanges(models.Model):
+    r"""Модель изменения цен.
+    Хранит данные об изменении цен для каждого блюда"""
 
     dish = models.ForeignKey(
         to='carte.Dish',
