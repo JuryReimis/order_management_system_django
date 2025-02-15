@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block head %}
-	<link href="{% static 'orders/css/styles.css' %}" rel="stylesheet">
+    <link href="{% static 'orders/css/styles.css' %}" rel="stylesheet">
 {% endblock %}
 
 
@@ -41,6 +41,13 @@
                                            name="item_{{ dish.pk }}-quantity" value="1" min="0">
                                 </div>
                             </li>
+                        {% empty %}
+                            <div class="col-12">
+                                <div class="alert alert-info" role="alert">
+                                    Блюд нет. Добавьте хотя бы одно
+                                </div>
+                                <a href="{% url 'carte:create_dish' %}">Добавить блюдо</a>
+                            </div>
                         {% endfor %}
                     </ul>
                 </div>
