@@ -28,30 +28,30 @@
 ## Подготовка к запуску:
 - Создайте новое окружение
 - Клонируйте в него репозиторий
-- Подготовьте файл .env со следующей структурой:
-```.dotenv
-SECRET_KEY=ВАШ_СЕКРЕТНЫЙ_КЛЮЧ
-
-DEBUG=TRUE
-
-ALLOWED_HOSTS=localhost,127.0.0.1
-
-INTERNAL_IPS=127.0.0.1,
-```
 - Перейдите в директорию приложения
-```bash
-cd order_management_system_django
-```
+  ```bash
+  cd order_management_system_django
+  ```
+- Подготовьте файл .env со следующей структурой:
+  ```.dotenv
+  SECRET_KEY=ВАШ_СЕКРЕТНЫЙ_КЛЮЧ
+  
+  DEBUG=TRUE
+  
+  ALLOWED_HOSTS=localhost,127.0.0.1
+  
+  INTERNAL_IPS=127.0.0.1,
+  ```
 - Установите все зависимости:
-```bash
-pip install -r requirements.txt
-```
+  ```bash
+  pip install -r requirements.txt
+  ```
 - Выполните миграции:
-```bash
-py manage.py makemigrations
-py manage.py migrate
-```
+  ```bash
+  py manage.py makemigrations
+  py manage.py migrate
+  ```
 - Запустите проект:
-```bash
-py manage.py runserver
-```
+  ```bash
+  py manage.py runserver
+  ```
