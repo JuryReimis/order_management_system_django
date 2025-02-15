@@ -27,9 +27,9 @@ class GetDetailOrderContextService:
         )
         return self._price_changes_repository().get_actual_price_by_time(dto)
 
-    def execute(self, order: OrderDTO) -> OrderContextDTO:
-        order_data = self._get_order_context(order)
-        items_data = self._get_items_context(order)
+    def execute(self, order_dto: OrderDTO) -> OrderContextDTO:
+        order_data = self._get_order_context(order_dto)
+        items_data = self._get_items_context(order_dto)
         price_changes_data = self._get_price_changes_context(ids=order_data.items, last_update=order_data.updated)
 
         return OrderContextDTO(
