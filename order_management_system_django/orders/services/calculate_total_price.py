@@ -1,4 +1,5 @@
-
+import decimal
+from decimal import Decimal
 from typing import List
 
 from carte.dto.dish_price import DishPriceDTO
@@ -15,8 +16,11 @@ class CalculateTotalPriceService:
         total = 0
         for dish in dish_list:
             total += dish.price * dish.quantity
-        return total
+        return Decimal(total).quantize(Decimal('0.00'), rounding=decimal.ROUND_HALF_UP)
 
-    def execute(self, order_items: OrderItemsDTO, repository: DishPriceRepository):
-        price_list = self._get_price_list(order_items, repository)
-        return self._get_sum(price_list)
+    def execute(self, order_items_dto: OrderItemsDTO, repository: DishPriceRepository) -> Decimal | None:
+        if order_items_dto.items_quantity_dict:
+            price_list = self._get_price_list(order_items_dto, repository)
+            return self._get_sum(price_list)
+        else:
+            return None
