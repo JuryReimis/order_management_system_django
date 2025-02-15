@@ -8,6 +8,8 @@ from carte.models import Dish
 
 
 class AddNewDishView(generic.CreateView):
+    r"""Представление для создания нового блюда
+    Стандартное CreateView, добавлена обработка ошибок"""
     template_name = 'carte/create-new-dish.html'
     form_class = DishForm
     success_url = reverse_lazy('carte:create_dish')
@@ -24,23 +26,27 @@ class AddNewDishView(generic.CreateView):
 
 
 class DishDetailView(generic.DetailView):
+    r"""Отображает страницу детальной информации о блюде
+    Стандартное Detail-представление. Добавлена логика обработки post-запроса с изменением цены/названия блюда"""
     model = Dish
     template_name = 'carte/dish-detail.html'
 
     def post(self, request, *args, **kwargs):
-        dish = get_object_or_404(Dish, pk=kwargs.get('pk'))
+        dish = get_object_or_404(Dish, pk=kwargs.get('pk'))  # Получение объекта Dish, если не найден подъем HTTP404
         title = request.POST.get('new_title', dish.title)
         price = request.POST.get('new_price', dish.price)
-        form = DishForm(instance=dish, data={'price': price, 'title': title})
-        if form.is_valid():
+        form = DishForm(instance=dish, data={'price': price, 'title': title})  # Инициализация формы
+        if form.is_valid():  # Если форма валидна - сохраняем изменения и выводим сообщение об успешном сохранении
             form.save()
             messages.success(request, "Изменения успешно приняты")
         else:
             messages.warning(request, "Ошибка в заполнении формы")
-        return self.get(request, args, kwargs)
+        return self.get(request, args, kwargs)  # В любом случае переадресация на туже страницу
 
 
 class DishDeleteView(generic.DeleteView):
+    r"""Удаление блюда.
+    Стандартное DeleteView, изменений нет"""
     model = Dish
     context_object_name = 'dish'
     template_name = 'carte/delete-dish-confirm.html'
@@ -48,6 +54,8 @@ class DishDeleteView(generic.DeleteView):
 
 
 class GetAllDishesView(generic.ListView):
+    r"""Вывод списка всех блюд в базе данных
+    Стандартное ListView. Добавлен порядок вывод: по цене от большего к меньшему."""
     paginate_by = 9
     context_object_name = 'dishes'
     template_name = 'carte/dish-list.html'
