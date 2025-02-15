@@ -1,4 +1,3 @@
-from decimal import Decimal
 from typing import List
 
 from django.db import transaction
@@ -6,12 +5,12 @@ from django.utils import timezone
 
 from carte.models import Dish
 from orders.dto.order_items import OrderItemsDTO
-from orders.models import Order, OrderItems
+from orders.models import OrderItems
 
 
 class UpdateOrderItemsRepository:
     def __init__(self, dto: OrderItemsDTO):
-        self._order_items = dto
+        self._order_items_dto = dto
         self._order_items_to_update = []
         self._order_items_to_create = []
 
@@ -25,7 +24,7 @@ class UpdateOrderItemsRepository:
         exciting_dish_ids = exciting_items.keys()
 
         for dish in dishes_to_add:
-            quantity = self._order_items.items_quantity_dict.get(dish.pk)
+            quantity = self._order_items_dto.items_quantity_dict.get(dish.pk)
             if dish.pk in exciting_dish_ids:
                 order_item = exciting_items.get(dish.pk)
                 order_item.quantity = quantity
@@ -40,12 +39,12 @@ class UpdateOrderItemsRepository:
 
         if self._order_items_to_create:
             OrderItems.objects.bulk_create(self._order_items_to_create)
-        self._order_items.last_update = timezone.now()
+        self._order_items_dto.last_update = timezone.now()
 
     def _update_items(self):
-        order_id = self._order_items.order_id
+        order_id = self._order_items_dto.order_id
         if order_id is not None:
-            items = list(self._order_items.items_quantity_dict.keys())
+            items = list(self._order_items_dto.items_quantity_dict.keys())
             with transaction.atomic():
                 self._delete_unselected_items(order_id, items)
                 self._compile_items_lists(order_id, items)
@@ -54,4 +53,5 @@ class UpdateOrderItemsRepository:
             raise ValueError("Невозможно сохранить список без id заказа")
 
     def save_items(self):
-        self._update_items()
+        if self._order_items_dto.items_quantity_dict:
+            self._update_items()
