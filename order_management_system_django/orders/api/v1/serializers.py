@@ -7,6 +7,7 @@ from orders.models import Order
 
 
 class OrderSerializer(serializers.ModelSerializer):
+    r"""Стандартный сериализатор для модели Order"""
 
     class Meta:
         model = Order
@@ -15,6 +16,8 @@ class OrderSerializer(serializers.ModelSerializer):
 
 
 class OrderContextSerializer(serializers.Serializer):
+    r"""Сериализатор для преобразования OrderContextDTO в json"""
+
     order_id = serializers.IntegerField()
     order_table = serializers.IntegerField()
     order_total_price = serializers.DecimalField(max_digits=8, decimal_places=2)
@@ -24,6 +27,7 @@ class OrderContextSerializer(serializers.Serializer):
 
     def to_representation(self, instance: OrderContextDTO):
 
+        # Присваиваем каждому item цены из словаря с актуальными ценами
         for item in instance.items:
             item.price = instance.item_price_dict.get(item.dish_id)
 

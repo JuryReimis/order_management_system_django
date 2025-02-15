@@ -32,6 +32,8 @@ class GetOrderDetailAPIView(GetOrderDetailMixin, RetrieveAPIView):
 
 
 class CreateOrderAPIView(APIView):
+    r"""Эндпоинт для создания заказа.
+    На вход должен поступать table_number в формате int и список словарей {'dish_id': int, 'quantity': int}"""
 
     def post(self, request, *args, **kwargs):
         items: List[Dict[str, int]] = request.data.get('items')
@@ -60,6 +62,10 @@ class CreateOrderAPIView(APIView):
 
 
 class UpdateOrderItemsAPIView(UpdateAPIView):
+    r"""Эндпоинт для обновления заказа.
+    На вход ожидает несколько значений. items - список словарей {'dish_id': int, 'quantity': int}
+    Список значений Dish, которые необходимо оставить в составе заказа.
+    status: int - цифровое выражение статуса, который необходимо выставить заказу"""
     serializer_class = OrderSerializer
 
     def patch(self, request, *args, **kwargs):
@@ -101,4 +107,5 @@ class UpdateOrderItemsAPIView(UpdateAPIView):
 
 
 class DeleteOrderAPIView(DestroyAPIView):
+    r"""Эндпоинт для удаления заказа"""
     queryset = Order.objects.all()
