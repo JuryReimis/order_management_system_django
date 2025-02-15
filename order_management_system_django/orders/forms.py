@@ -29,6 +29,8 @@ class UpdateQuantityForm(forms.ModelForm):
 
 
 class DateRangeForm(forms.Form):
+    r"""Форма для ввода периода времени"""
+
     start_date = forms.DateTimeField(
         label="Начальная дата",
         widget=forms.DateTimeInput(attrs={'type': 'datetime-local'}),
@@ -45,6 +47,7 @@ class DateRangeForm(forms.Form):
     )
 
     def clean(self):
+        r"""Проверка на соответствие конечной и начальной даты"""
         cleaned_data = super().clean()
         start_date = cleaned_data.get('start_date')
         end_date = cleaned_data.get('end_date')
